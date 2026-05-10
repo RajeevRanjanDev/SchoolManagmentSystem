@@ -1,0 +1,15 @@
+export { authApi } from './auth.api';
+export { studentsApi } from './students.api';
+export { usersApi } from './users.api';
+export { attendanceApi } from './attendance.api';
+export { homeworkApi } from './homework.api';
+export { feesApi } from './fees.api';
+export { libraryApi } from './library.api';
+export { transportApi } from './transport.api';
+export { examsApi } from './exams.api';
+export { timetableApi } from './timetable.api';
+export { circularsApi } from './circulars.api';
+export { eventsApi } from './events.api';
+export { notificationsApi } from './notifications.api';
+export { dashboardApi } from './dashboard.api';
+export { apiClient } from './client';

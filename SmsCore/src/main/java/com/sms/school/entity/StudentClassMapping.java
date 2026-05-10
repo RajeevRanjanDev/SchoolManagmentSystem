@@ -1,0 +1,49 @@
+package com.sms.school.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+/**
+ * Maps a student to a class+section for a given academic year.
+ * A student can be in different classes each year (promotion).
+ */
+@Entity
+@Table(
+        name = "student_class_mapping",
+        indexes = {
+                @Index(name = "idx_scm_student", columnList = "student_id"),
+                @Index(name = "idx_scm_section", columnList = "section_id")
+        }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class StudentClassMapping extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_id", nullable = false)
+    private School school;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private Student student;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "class_id", nullable = false)
+    private SchoolClass schoolClass;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "section_id", nullable = false)
+    private Section section;
+
+    @Column(name = "academic_year", nullable = false)
+    private String academicYear;
+
+    @Column(name = "roll_number")
+    private String rollNumber;
+
+    @Column(name = "is_current", nullable = false)
+    private boolean current = true;
+}
