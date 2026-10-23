@@ -1,0 +1,103 @@
+# =============================================================
+#  School Management System — Base Configuration
+#  Profile-specific DB config lives in:
+#    application-local.yml  →  H2 in-memory  (local dev)
+#    application-prod.yml   →  PostgreSQL     (cloud / production)
+#
+#  Run locally:  mvn spring-boot:run   (defaults to 'local' profile)
+#  Run prod:     java -jar app.jar --spring.profiles.active=prod
+# =============================================================
+
+spring:
+  application:
+    name: school-management-system
+
+  # Default to PostgreSQL so data persists across restarts (application-pg.yml).
+  # For throwaway in-memory H2 instead:  --spring.profiles.active=local,demo
+  profiles:
+    active: pg
+
+  # ── Jackson JSON ──────────────────────────────────────────
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+
+  # ── File uploads (attachments: PDF / images) ──────────────
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+  # ── Mail (SMTP) ───────────────────────────────────────────
+  # Gmail SMTP for transactional emails (e.g. temp passwords).
+  # Everything is configured EXCEPT the password: supply a Gmail
+  # *App Password* (not the normal account password) via the
+  # MAIL_PASSWORD environment variable. Until it is set, Spring still
+  # creates the JavaMailSender but sends will fail auth and be logged.
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: cosmanicmail@gmail.com
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+# ── App-level mail settings ───────────────────────────────
+app:
+  mail:
+    # Gmail rewrites the From to the authenticated account, so keep them aligned.
+    from: ${MAIL_FROM:cosmanicmail@gmail.com}
+
+# ── Server ────────────────────────────────────────────────
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# ── JWT ───────────────────────────────────────────────────
+jwt:
+  secret: ${JWT_SECRET:ThisIsAVerySecretKeyForSMSApplicationThatShouldBeChangedInProduction2024}
+  access-token-expiry-ms: ${JWT_ACCESS_EXPIRY:900000}       # 15 min
+  refresh-token-expiry-ms: ${JWT_REFRESH_EXPIRY:604800000}  # 7 days
+
+# ── Firebase Push Notifications ───────────────────────────
+firebase:
+  credentials-path: ${FIREBASE_CREDENTIALS:classpath:firebase-service-account.json}
+
+# ── File Upload ───────────────────────────────────────────
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:./uploads}
+  max-size: 10MB
+
+
+# ── Springdoc / Swagger UI ────────────────────────────────
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  show-actuator: false
+
+# ── Actuator ──────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized

@@ -1,0 +1,195 @@
+{
+  "info": {
+    "name": "School Management System API",
+    "description": "Mobile-developer collection for the SMS backend. Set the `baseUrl` collection variable (localhost or the dev tunnel). Run **Auth > Login** first — it auto-saves accessToken & refreshToken into collection variables, and every other request sends `Authorization: Bearer {{accessToken}}` automatically. When using the dev tunnel from a non-browser client, the `X-Tunnel-Skip-AntiPhishing-Page` header is already added at the collection level. See API-GUIDE.md for full flows.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://kkhwdk54-8080.inc1.devtunnels.ms", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "loginId", "value": "ABC-2025-0001", "type": "string" },
+    { "key": "password", "value": "changeme", "type": "string" },
+    { "key": "sectionId", "value": "1", "type": "string" },
+    { "key": "studentId", "value": "1", "type": "string" },
+    { "key": "examId", "value": "1", "type": "string" },
+    { "key": "classId", "value": "1", "type": "string" },
+    { "key": "academicYear", "value": "2025-2026", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (saves tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.success && res.data) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "  console.log('Saved tokens. Roles:', res.data.roles);",
+                  "} else {",
+                  "  console.log('Login failed:', res && res.message);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{loginId}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api","v1","auth","login"] }
+          }
+        },
+        {
+          "name": "Refresh token (saves tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.success && res.data) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api","v1","auth","refresh"] }
+          }
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"identifier\": \"{{loginId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["api","v1","auth","forgot-password"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/logout", "host": ["{{baseUrl}}"], "path": ["api","v1","auth","logout"] }
+          }
+        },
+        {
+          "name": "My profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/me/profile", "host": ["{{baseUrl}}"], "path": ["api","v1","me","profile"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student",
+      "item": [
+        { "name": "Dashboard", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/student/dashboard", "host": ["{{baseUrl}}"], "path": ["api","v1","student","dashboard"] } } },
+        { "name": "My profile (me)", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/student/me", "host": ["{{baseUrl}}"], "path": ["api","v1","student","me"] } } },
+        { "name": "Fees", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/student/fees", "host": ["{{baseUrl}}"], "path": ["api","v1","student","fees"] } } },
+        { "name": "Attendance", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/student/attendance", "host": ["{{baseUrl}}"], "path": ["api","v1","student","attendance"] } } },
+        { "name": "Assignments", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/student/assignments", "host": ["{{baseUrl}}"], "path": ["api","v1","student","assignments"] } } },
+        { "name": "Results", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/student/results", "host": ["{{baseUrl}}"], "path": ["api","v1","student","results"] } } },
+        { "name": "Circulars", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/student/circulars", "host": ["{{baseUrl}}"], "path": ["api","v1","student","circulars"] } } },
+        { "name": "Change password", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"currentPassword\": \"old\",\n  \"newPassword\": \"new\"\n}" }, "url": { "raw": "{{baseUrl}}/api/v1/student/change-password", "host": ["{{baseUrl}}"], "path": ["api","v1","student","change-password"] } } },
+        { "name": "Payments: create order", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"feeIds\": [1]\n}" }, "url": { "raw": "{{baseUrl}}/api/v1/student/payments/orders", "host": ["{{baseUrl}}"], "path": ["api","v1","student","payments","orders"] } } },
+        { "name": "Payments: verify", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"paymentAttemptId\": 1,\n  \"razorpayOrderId\": \"order_xxx\",\n  \"razorpayPaymentId\": \"pay_xxx\",\n  \"razorpaySignature\": \"sig_xxx\"\n}" }, "url": { "raw": "{{baseUrl}}/api/v1/student/payments/verify", "host": ["{{baseUrl}}"], "path": ["api","v1","student","payments","verify"] } } },
+        { "name": "Payments: history", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/student/payments/history", "host": ["{{baseUrl}}"], "path": ["api","v1","student","payments","history"] } } }
+      ]
+    },
+    {
+      "name": "Parent",
+      "item": [
+        { "name": "My children", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/parent/children", "host": ["{{baseUrl}}"], "path": ["api","v1","parent","children"] } } },
+        { "name": "Child attendance", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/parent/children/{{studentId}}/attendance?month=2026-10", "host": ["{{baseUrl}}"], "path": ["api","v1","parent","children","{{studentId}}","attendance"], "query": [{ "key": "month", "value": "2026-10" }] } } },
+        { "name": "Child results", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/parent/children/{{studentId}}/results", "host": ["{{baseUrl}}"], "path": ["api","v1","parent","children","{{studentId}}","results"] } } },
+        { "name": "Child fees", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/parent/children/{{studentId}}/fees?academicYear={{academicYear}}", "host": ["{{baseUrl}}"], "path": ["api","v1","parent","children","{{studentId}}","fees"], "query": [{ "key": "academicYear", "value": "{{academicYear}}" }] } } }
+      ]
+    },
+    {
+      "name": "Teacher",
+      "item": [
+        { "name": "Dashboard", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/teacher/dashboard", "host": ["{{baseUrl}}"], "path": ["api","v1","teacher","dashboard"] } } },
+        { "name": "My assignments", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/teacher/my-assignments", "host": ["{{baseUrl}}"], "path": ["api","v1","teacher","my-assignments"] } } },
+        { "name": "My class sections", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/teacher/my-class-sections", "host": ["{{baseUrl}}"], "path": ["api","v1","teacher","my-class-sections"] } } },
+        { "name": "Section roster", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/admin/sections/{{sectionId}}/students", "host": ["{{baseUrl}}"], "path": ["api","v1","admin","sections","{{sectionId}}","students"] } } },
+        { "name": "Mark attendance (bulk)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"sectionId\": {{sectionId}},\n  \"attendanceDate\": \"2026-10-21\",\n  \"entries\": [\n    { \"studentId\": 101, \"status\": \"PRESENT\", \"remarks\": \"\" },\n    { \"studentId\": 102, \"status\": \"ABSENT\", \"remarks\": \"sick\" },\n    { \"studentId\": 103, \"status\": \"LEAVE\", \"remarks\": \"approved\" }\n  ]\n}" }, "url": { "raw": "{{baseUrl}}/api/v1/teacher/attendance", "host": ["{{baseUrl}}"], "path": ["api","v1","teacher","attendance"] } } },
+        { "name": "Enter marks (bulk)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"examId\": {{examId}},\n  \"entries\": [\n    { \"studentId\": 101, \"marksObtained\": 87.5, \"grade\": \"A\", \"remarks\": \"\" }\n  ]\n}" }, "url": { "raw": "{{baseUrl}}/api/v1/teacher/marks", "host": ["{{baseUrl}}"], "path": ["api","v1","teacher","marks"] } } },
+        { "name": "Post announcement (notification)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"classId\": {{classId}},\n  \"sectionId\": {{sectionId}},\n  \"studentId\": null,\n  \"title\": \"Bring sports kit\",\n  \"content\": \"PT tomorrow at 9am\",\n  \"attachmentUrl\": null,\n  \"attachmentName\": null,\n  \"published\": true\n}" }, "url": { "raw": "{{baseUrl}}/api/v1/teacher/announcements", "host": ["{{baseUrl}}"], "path": ["api","v1","teacher","announcements"] } } },
+        { "name": "Create homework", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"sectionId\": {{sectionId}},\n  \"subjectId\": 1,\n  \"title\": \"Chapter 3 exercises\",\n  \"description\": \"Q1-Q10\",\n  \"dueDate\": \"2026-10-25\",\n  \"academicYear\": \"{{academicYear}}\"\n}" }, "url": { "raw": "{{baseUrl}}/api/v1/teacher/homework", "host": ["{{baseUrl}}"], "path": ["api","v1","teacher","homework"] } } }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        { "name": "Dashboard", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/dashboard", "host": ["{{baseUrl}}"], "path": ["api","v1","dashboard"] } } },
+        { "name": "List classes", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/admin/classes", "host": ["{{baseUrl}}"], "path": ["api","v1","admin","classes"] } } },
+        { "name": "List/search students", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/admission/students?search=&page=0&size=20", "host": ["{{baseUrl}}"], "path": ["api","v1","admission","students"], "query": [{ "key": "search", "value": "" }, { "key": "page", "value": "0" }, { "key": "size", "value": "20" }] } } },
+        { "name": "Student detail", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/admission/students/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["api","v1","admission","students","{{studentId}}"] } } },
+        { "name": "List teachers", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/admin/teachers", "host": ["{{baseUrl}}"], "path": ["api","v1","admin","teachers"] } } },
+        { "name": "Broadcast notification", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Holiday notice\",\n  \"body\": \"School closed Friday\",\n  \"type\": \"GENERAL\",\n  \"audience\": \"ALL_SCHOOL\",\n  \"classId\": null,\n  \"sectionId\": null,\n  \"studentId\": null,\n  \"feeType\": null,\n  \"scheduledAt\": null,\n  \"attachmentUrl\": null,\n  \"attachmentName\": null\n}" }, "url": { "raw": "{{baseUrl}}/api/v1/notifications/broadcast", "host": ["{{baseUrl}}"], "path": ["api","v1","notifications","broadcast"] } } }
+      ]
+    },
+    {
+      "name": "Finance",
+      "item": [
+        { "name": "List fees", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/fees?academicYear={{academicYear}}", "host": ["{{baseUrl}}"], "path": ["api","v1","fees"], "query": [{ "key": "academicYear", "value": "{{academicYear}}" }] } } },
+        { "name": "Fee summary", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/fees/summary", "host": ["{{baseUrl}}"], "path": ["api","v1","fees","summary"] } } },
+        { "name": "Pending fees", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/fees/pending", "host": ["{{baseUrl}}"], "path": ["api","v1","fees","pending"] } } },
+        { "name": "Online payments", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/admin/finance/payments?page=0&size=20", "host": ["{{baseUrl}}"], "path": ["api","v1","admin","finance","payments"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }] } } },
+        { "name": "Reconciliation summary", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/admin/finance/reconciliation", "host": ["{{baseUrl}}"], "path": ["api","v1","admin","finance","reconciliation"] } } }
+      ]
+    },
+    {
+      "name": "Transport",
+      "item": [
+        { "name": "Students + routes", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/transport/students", "host": ["{{baseUrl}}"], "path": ["api","v1","transport","students"] } } },
+        { "name": "List routes", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/transport/routes", "host": ["{{baseUrl}}"], "path": ["api","v1","transport","routes"] } } }
+      ]
+    },
+    {
+      "name": "Notifications & Attachments",
+      "item": [
+        { "name": "My notifications", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/notifications", "host": ["{{baseUrl}}"], "path": ["api","v1","notifications"] } } },
+        { "name": "Unread count", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/notifications/unread-count", "host": ["{{baseUrl}}"], "path": ["api","v1","notifications","unread-count"] } } },
+        { "name": "Upload attachment (multipart)", "request": { "method": "POST", "header": [], "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": [] }] }, "url": { "raw": "{{baseUrl}}/api/v1/attachments", "host": ["{{baseUrl}}"], "path": ["api","v1","attachments"] } } }
+      ]
+    },
+    {
+      "name": "Super Admin",
+      "item": [
+        { "name": "Platform stats", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/super/stats", "host": ["{{baseUrl}}"], "path": ["api","v1","super","stats"] } } },
+        { "name": "List schools", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/super/schools?page=0&size=20", "host": ["{{baseUrl}}"], "path": ["api","v1","super","schools"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }] } } },
+        { "name": "Schools in alert", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/super/schools/alerts", "host": ["{{baseUrl}}"], "path": ["api","v1","super","schools","alerts"] } } },
+        { "name": "Operations summary", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/super/operations/summary", "host": ["{{baseUrl}}"], "path": ["api","v1","super","operations","summary"] } } }
+      ]
+    }
+  ]
+}

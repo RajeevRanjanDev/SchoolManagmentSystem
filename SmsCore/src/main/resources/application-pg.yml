@@ -1,0 +1,53 @@
+# =============================================================
+#  PG Profile — Persistent PostgreSQL for local development
+#  Data survives restarts (unlike the H2 demo/local profiles).
+#
+#  Run:  mvn spring-boot:run -Dspring-boot.run.profiles=pg
+#
+#  Requires a running PostgreSQL with a database named sms_db.
+#  Defaults match a standard local install (postgres/postgres on 5432);
+#  override with env vars DB_HOST / DB_PORT / DB_NAME / DB_USERNAME / DB_PASSWORD.
+# =============================================================
+
+spring:
+
+  # ── PostgreSQL DataSource ─────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:sms_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: SmsHikariPool
+      maximum-pool-size: 15
+      connection-test-query: SELECT 1
+
+  # ── JPA / Hibernate ──────────────────────────────────────
+  #  'update' keeps the schema in sync with the entities AND preserves data
+  #  across restarts. Flyway is OFF because the entity set is the source of truth here.
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        default_schema: public
+
+  flyway:
+    enabled: false
+
+  h2:
+    console:
+      enabled: false
+
+# ── Logging ──────────────────────────────────────────────
+logging:
+  level:
+    com.sms.school: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.springframework.web: WARN
+  pattern:
+    console: "%d{HH:mm:ss} [%-5level] %logger{30} - %msg%n"

@@ -1,0 +1,56 @@
+# =============================================================
+#  LOCAL Profile — H2 In-Memory Database
+#  Activated automatically (default profile in application.yml)
+#  No PostgreSQL or Docker needed.
+#
+#  H2 Console:  http://localhost:8080/h2-console
+#    JDBC URL:  jdbc:h2:mem:smsdb
+#    User:      sa
+#    Password:  (leave blank)
+# =============================================================
+
+spring:
+
+  # ── H2 In-Memory DataSource ───────────────────────────────
+  datasource:
+    url: jdbc:h2:mem:smsdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;NON_KEYWORDS=VALUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # ── JPA / Hibernate ──────────────────────────────────────
+  #  Hibernate creates & drops schema automatically.
+  #  Flyway is disabled because its scripts use BIGSERIAL (PostgreSQL-only).
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        default_schema: PUBLIC
+
+  # ── Flyway — OFF for local (H2 handles DDL via Hibernate) ─
+  flyway:
+    enabled: false
+
+  # ── H2 Web Console ────────────────────────────────────────
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false   # localhost only
+
+
+# ── Verbose logging for local development ────────────────
+logging:
+  level:
+    com.sms.school: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss} [%-5level] %logger{30} - %msg%n"
