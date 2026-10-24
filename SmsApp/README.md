@@ -15,9 +15,10 @@ routes each user to their own experience based on the role in their JWT:
   Toolkit, React Query, React Navigation.
 - **Backend:** the SmsCore Spring Boot API (default `http://localhost:8080`).
 
-> ⚠️ **The native `android/` and `ios/` folders are not committed to this repo.** You must
-> generate them once (see [Step 0](#step-0--generate-the-native-projects-one-time)) before the
-> app can build on a device/emulator.
+> ✅ The native **`android/`** and **`ios/`** projects are generated and the native libraries
+> are wired. After `npm install` you still need three one-time things before building — fonts,
+> and (for real push + maps) your own Firebase/Maps keys. See
+> [Step 0 — one-time native setup](#step-0--one-time-native-setup).
 >
 > ⚠️ **This is a bare React Native app, NOT Expo.** You **cannot** run it with the **Expo Go**
 > app + QR code. See [Can I use Expo Go?](#can-i-use-expo-go-scan-a-qr-code).
@@ -47,7 +48,7 @@ Go, those are Expo apps — this one isn't.)
 
 ### Install an APK on an Android phone
 
-After [Step 0](#step-0--generate-the-native-projects-one-time) + `.env` are done:
+After [Step 0](#step-0--one-time-native-setup) + `.env` are done:
 
 ```bash
 cd android
@@ -85,51 +86,42 @@ Set these environment variables (Android):
 
 ---
 
-## Step 0 — Generate the native projects (one time)
+## Step 0 — one-time native setup
 
-Because `android/` and `ios/` aren't in the repo, create them from a scratch RN project of the
-**same name and version**, then copy them in.
+The native **`android/`** and **`ios/`** projects (package / bundle id **`com.smsparentapp`**)
+are already generated and the native libraries are wired:
 
-```bash
-# in a temporary folder OUTSIDE this repo
-npx @react-native-community/cli@latest init SMSParentApp --version 0.73.6
-```
+- ✅ **react-native-config** — `.env` wired in `android/app/build.gradle` (dotenv.gradle).
+- ✅ **@react-native-firebase** — Google-Services Gradle plugin + classpath (Android),
+  `[FIRApp configure]` in `AppDelegate.mm` + static-framework Podfile (iOS). **Placeholder**
+  `google-services.json` / `GoogleService-Info.plist` are committed so it builds.
+- ✅ **react-native-maps** — Android manifest has a Maps API-key **placeholder** + permissions.
+- ✅ **react-native-gesture-handler** — imported at the top of `index.js`.
+- ✅ **react-native-reanimated** — babel plugin in `babel.config.js`.
 
-Then copy the two native folders into this project:
+You still must do these **once**:
 
-```bash
-# from the generated SMSParentApp folder
-cp -r SMSParentApp/android  <path>/SchoolManagmentSystem-main/ParentApp/android
-cp -r SMSParentApp/ios      <path>/SchoolManagmentSystem-main/ParentApp/ios
-```
+1. **Link the icon fonts** (vector-icons, both platforms) — after `npm install`:
+   ```bash
+   npx react-native-asset
+   ```
+   (Run it on the Mac too, so it wires the fonts into the Xcode project for iOS.)
 
-(On Windows PowerShell use `Copy-Item -Recurse SMSParentApp\android ...\ParentApp\android`.)
+2. **Replace the placeholder keys** with your own (needed only for real push / maps — the app
+   builds and runs without them, those features just won't work):
+   - `android/app/google-services.json` → your Firebase Android config.
+   - `ios/SMSParentApp/GoogleService-Info.plist` → your Firebase iOS config (and add it to the
+     Xcode target's *Copy Bundle Resources*).
+   - `android/app/src/main/AndroidManifest.xml` → replace `YOUR_GOOGLE_MAPS_API_KEY`.
 
-After copying, do the one-time native wiring below (these libraries need more than
-autolinking):
+3. **iOS only (macOS):** install pods —
+   ```bash
+   cd ios && pod install && cd ..
+   ```
 
-- **react-native-vector-icons** (app uses MaterialCommunityIcons):
-  - Android: add to `android/app/build.gradle`
-    `apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"`
-  - iOS: add the font files under **UIAppFonts** in `ios/SMSParentApp/Info.plist`
-    (see the lib's README).
-- **react-native-config** (reads `.env`):
-  - Android: in `android/app/build.gradle` add
-    `apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"`
-  - iOS: follow the react-native-config iOS setup (add the build phase).
-- **@react-native-firebase** (push notifications — optional to run, required for FCM):
-  - Android: put `google-services.json` in `android/app/`, apply the
-    `com.google.gms.google-services` plugin.
-  - iOS: put `GoogleService-Info.plist` in the Xcode project.
-- **react-native-maps** (bus tracking):
-  - Android: add your Google Maps API key to `android/app/src/main/AndroidManifest.xml`.
-  - iOS: configure per react-native-maps docs.
-- **react-native-gesture-handler** / **react-native-reanimated**: already imported/configured
-  in `index.js` and `babel.config.js` — nothing extra needed after the native folders exist.
-
-> If you'd rather not hand-wire these, the alternative is to scaffold a fresh RN app and move
-> `src/`, `App.tsx`, `index.js`, `package.json` deps, `.env`, `babel.config.js`,
-> `metro.config.js`, `tsconfig.json` into it.
+> Changing the Android **applicationId** / iOS **bundle id** from `com.smsparentapp` is
+> optional; if you do, update it in `android/app/build.gradle`, the Xcode target, and your
+> Firebase config files.
 
 ---
 
@@ -249,7 +241,7 @@ There's also a shortcut: `npm run build:android`.
 - **Red screen / stale JS after pulling changes** → `npm run start:clear`, then reload the app
   (press `r` in the Metro terminal, or shake the device → Reload).
 - **Icons show as boxes/blank** → `react-native-vector-icons` fonts weren't linked; redo the
-  vector-icons native step in [Step 0](#step-0--generate-the-native-projects-one-time), then
+  vector-icons step in [Step 0](#step-0--one-time-native-setup) (`npx react-native-asset`), then
   rebuild.
 - **iOS: `pod install` errors** → `cd ios && pod repo update && pod install`; ensure CocoaPods
   and Xcode Command Line Tools are installed.
@@ -272,7 +264,9 @@ ParentApp/
 │  └─ utils/          # roles, formatters, dates
 ├─ App.tsx, index.js
 ├─ .env / .env.example
-└─ (android/, ios/)   # generated in Step 0 — not committed
+├─ android/           # native Android project (generated, wired)
+├─ ios/               # native iOS project (generated, wired)
+└─ react-native.config.js  # font asset linking for `npx react-native-asset`
 ```
 
 For the full API reference and architecture, see the repo root:
